@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import socket
+import tempfile
 import unittest
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import httpx
 
@@ -166,4 +168,22 @@ class WebhookAndHealthcheckTests(unittest.IsolatedAsyncioTestCase):
         app.bot.set_webhook.assert_awaited_once()
 
     def test_healthcheck_polling_mode(self) -> None:
-        self.assertEqual(run_healthcheck({}), 0)
+        self.assertEqual(run_healthcheck({}, container_check=False), 0)
+        with patch("telbot.healthcheck.os.path.exists", return_value=False):
+            self.assertEqual(run_healthcheck({}), 0)
+        with tempfile.TemporaryDirectory() as tmp:
+            cmdline_py = os.path.join(tmp, "cmdline_py")
+            with open(cmdline_py, "wb") as f:
+                f.write(b"python\x00bot.py\x00")
+            self.assertEqual(
+                run_healthcheck({}, container_check=True, proc_cmdline_path=cmdline_py),
+                0,
+            )
+
+            cmdline_init = os.path.join(tmp, "cmdline_init")
+            with open(cmdline_init, "wb") as f:
+                f.write(b"/sbin/init\x00")
+            self.assertEqual(
+                run_healthcheck({}, container_check=True, proc_cmdline_path=cmdline_init),
+                1,
+            )

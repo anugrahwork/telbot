@@ -80,7 +80,7 @@ async def run_webhook_server(
         web_app = build_webhook_tornado_app(app, settings)
         server = None
         try:
-            server = web_app.listen(settings.port, address="0.0.0.0")
+            server = web_app.listen(settings.port, address="0.0.0.0")  # nosec B104 - container webhook server must bind all interfaces
             logger.info("Webhook + /health server listening on 0.0.0.0:%s", settings.port)
             await app.bot.set_webhook(
                 url=settings.webhook_url,

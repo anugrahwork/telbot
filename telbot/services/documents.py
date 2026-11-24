@@ -97,7 +97,7 @@ def extract_docx_text(
         raise ValueError("Unsafe XML DOCTYPE/ENTITY declaration in DOCX")
 
     try:
-        tree = ET.fromstring(xml_bytes)
+        tree = ET.fromstring(xml_bytes)  # nosec B314 - DOCTYPE/ENTITY and size limits enforced above
     except ET.ParseError as exc:
         raise ValueError("Invalid or corrupted DOCX XML.") from exc
     paragraphs: list[str] = []

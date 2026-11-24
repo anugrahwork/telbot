@@ -20,6 +20,25 @@ This bot is designed for open/community Telegram deployments where untrusted use
    - Downloadable file names pass `sanitize_filename()` to block path traversal and executable extensions.
 6. **Constant-Time Webhook Verification:** Webhook updates validate `X-Telegram-Bot-Api-Secret-Token` via `hmac.compare_digest`.
 
+## Outbound Network Endpoints
+
+Every external connection Telbot makes is transparent, documented, and gated by `.env` settings or SSRF validation:
+
+| Destination | Purpose | Control / Disable Flag |
+| :--- | :--- | :--- |
+| `api.telegram.org` | Telegram Bot API (updates, messages, files) | Required (`BOT_TOKEN`) |
+| `AI_BASE_URL` (default `api.openai.com`) & `FALLBACK_AI_BASE_URL` | Primary/fallback OpenAI-compatible LLM, Vision, and Image APIs | Configured by operator in `.env` |
+| `html.duckduckgo.com` & `api.crossref.org` | Free open-web & academic open-access search | `ENABLE_WEB_SEARCH=false` |
+| `r.jina.ai` | Clean webpage reader fallback for JS/403 pages | `ENABLE_JINA_READER=false` or `ENABLE_URL_READER=false` |
+| User-provided public `http(s)://` URLs | Webpage summarization when reading shared links | `ENABLE_URL_READER=false` (always guarded by `telbot/security/ssrf.py`) |
+| `api.tavily.com` | Optional enhanced search & extraction API | Inactive unless `TAVILY_API_KEY` is set |
+| `api.cloudflare.com` | Optional Cloudflare Workers AI LLM/Vision/Image fallback | Inactive unless `CF_ACCOUNT_ID` & `CF_API_TOKEN` are set |
+| `api.ocr.space` | Optional OCR text-extraction fallback | Inactive unless `OCR_API_KEY` is set (or `ENABLE_OCR_SPACE=false`) |
+| `image.pollinations.ai` | Optional free image-generation fallback | `ENABLE_POLLINATIONS_FALLBACK=false` or `ENABLE_IMAGE_GEN=false` |
+| `quickchart.io` | Chart PNG rendering for `<chart>` directives | `ENABLE_CHARTS=false` |
+| `SUPABASE_URL` | Optional cloud memory/quota backup sync | Inactive unless `SUPABASE_URL` & `SUPABASE_KEY` are set |
+| `127.0.0.1:<PORT>/health` | Loopback-only container health probe (`telbot/healthcheck.py`) | Webhook mode only (`WEBHOOK_URL` / cloud host) |
+
 ## Operator Deployment Checklist
 
 - Never commit `.env` or `data/bot.db` to version control.

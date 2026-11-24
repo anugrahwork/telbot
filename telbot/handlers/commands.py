@@ -323,7 +323,7 @@ async def model_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         svc.model_button_cache.clear()
     buttons = [[InlineKeyboardButton("Auto (Primary + Fallback)", callback_data="mdl:auto")]]
     for prov_key, model_id, tag in choices:
-        key = hashlib.md5(f"{prov_key}:{model_id}".encode("utf-8")).hexdigest()[:10]
+        key = hashlib.sha256(f"{prov_key}:{model_id}".encode("utf-8")).hexdigest()[:10]
         svc.model_button_cache[key] = (prov_key, model_id)
         mark = "[Active] " if current == (prov_key, model_id) else ""
         buttons.append([InlineKeyboardButton(f"{mark}{model_id} [{tag}]", callback_data=f"mdl:{key}")])

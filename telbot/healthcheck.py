@@ -24,7 +24,7 @@ def run_healthcheck(
         port = (src.get("PORT") or "10000").strip()
         url = f"http://127.0.0.1:{port}/health"
         try:
-            with urllib.request.urlopen(url, timeout=3) as resp:
+            with urllib.request.urlopen(url, timeout=3) as resp:  # nosec B310 - loopback http://127.0.0.1 healthcheck only
                 return 0 if 200 <= resp.status < 300 else 1
         except Exception:
             return 1
