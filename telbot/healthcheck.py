@@ -7,7 +7,12 @@ import urllib.request
 from typing import Mapping
 
 
-def run_healthcheck(env: Mapping[str, str] | None = None) -> int:
+def run_healthcheck(
+    env: Mapping[str, str] | None = None,
+    *,
+    container_check: bool | None = None,
+    proc_cmdline_path: str = "/proc/1/cmdline",
+) -> int:
     """Return 0 when healthy, non-zero otherwise."""
     src = env if env is not None else os.environ
     webhook_active = bool(
@@ -24,9 +29,11 @@ def run_healthcheck(env: Mapping[str, str] | None = None) -> int:
         except Exception:
             return 1
 
-    if os.path.exists("/proc/1/cmdline"):
+    if container_check is None:
+        container_check = os.path.exists("/.dockerenv") or os.path.exists("/run/.containerenv")
+    if container_check and os.path.exists(proc_cmdline_path):
         try:
-            with open("/proc/1/cmdline", "rb") as f:
+            with open(proc_cmdline_path, "rb") as f:
                 return 0 if b"python" in f.read().lower() else 1
         except OSError:
             return 1
