@@ -30,3 +30,26 @@ jobs:
 
       - name: Run offline unit and integration tests
         run: python -m unittest discover -s tests -v
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install security scanners
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit pip-audit
+
+      - name: Static security scan (Bandit)
+        run: bandit -r bot.py telbot -ll -q
+
+      - name: Dependency vulnerability audit (pip-audit)
+        run: pip-audit -r requirements.txt
