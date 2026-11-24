@@ -1,0 +1,19 @@
+[project]
+name = "telbot"
+version = "1.0.0"
+description = "Open-access, security-hardened Telegram AI assistant built for public communities and easy self-hosting."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+[tool.ruff]
+line-length = 115
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

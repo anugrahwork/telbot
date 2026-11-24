@@ -1,0 +1,12 @@
+services:
+  bot:
+    build: .
+    container_name: telbot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    # Uncomment ports only if running in webhook mode behind a reverse proxy:
+    # ports:
+    #   - "${PORT:-10000}:${PORT:-10000}"
